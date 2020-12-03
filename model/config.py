@@ -1,3 +1,4 @@
+# 就是写个类, 用类属性表示配置
 class DefaultConfig():
     #backbone
     pretrained=True

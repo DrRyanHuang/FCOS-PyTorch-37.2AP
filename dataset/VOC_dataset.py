@@ -53,7 +53,7 @@ class VOCDataset(torch.utils.data.Dataset):
         with open(self._imgsetpath%self.imgset) as f:
             self.img_ids=f.readlines()
         self.img_ids=[x.strip() for x in self.img_ids]
-        self.name2id=dict(zip(VOCDataset.CLASSES_NAME,range(len(VOCDataset.CLASSES_NAME))))
+        self.name2id=dict(zip(VOCDataset.CLASSES_NAME, range(len(VOCDataset.CLASSES_NAME))))
         self.id2name = {v:k for k,v in self.name2id.items()}
         self.resize_size=resize_size
         self.mean=[0.485, 0.456, 0.406]

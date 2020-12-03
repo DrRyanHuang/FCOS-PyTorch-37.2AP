@@ -9,22 +9,30 @@ import random
 import torch.backends.cudnn as cudnn
 import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--epochs", type=int, default=30, help="number of epochs")
-parser.add_argument("--batch_size", type=int, default=16, help="size of each image batch")
-parser.add_argument("--n_cpu", type=int, default=4, help="number of cpu threads to use during batch generation")
-parser.add_argument("--n_gpu", type=str, default='0,1', help="number of cpu threads to use during batch generation")
-opt = parser.parse_args()
+def parse_arg():
+    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--epochs", type=int, default=30, help="number of epochs")
+    parser.add_argument("--batch_size", type=int, default=16, help="size of each image batch")
+    parser.add_argument("--n_cpu", type=int, default=4, help="number of cpu threads to use during batch generation")
+    parser.add_argument("--n_gpu", type=str, default='0,1', help="number of cpu threads to use during batch generation")
+    return parser.parse_args()
+
+opt = parse_arg()
+
 os.environ["CUDA_VISIBLE_DEVICES"] = opt.n_gpu
 torch.manual_seed(0)
 torch.cuda.manual_seed(0)
 torch.cuda.manual_seed_all(0)
 np.random.seed(0)
+
+# 该 flag 用于是否让程序在开始时花费一点额外时间，为整个网络的每个卷积层搜索最适合它的卷积实现算法
 cudnn.benchmark = False
-cudnn.deterministic = True
+# 该 flag 使得每次返回的卷积算法将是确定的，即默认算法
+cudnn.deterministic = True # 如果配合上设置 Torch 的随机种子为固定值的话，应该可以保证每次运行网络的时候相同输入的输出是固定的
 random.seed(0)
 transform = Transforms()
-train_dataset = VOCDataset(root_dir='/Users/VOC0712',resize_size=[800,1333],
+train_dataset = VOCDataset(root_dir='/home/ryan/Dataset/VOCdevkit/VOC2007',resize_size=[800,1333],
                            split='trainval',use_difficult=False,is_train=True,augment=transform)
 
 model = FCOSDetector(mode="training").cuda()

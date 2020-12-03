@@ -88,7 +88,7 @@ class Bottleneck(nn.Module):
         return out
 class ResNet(nn.Module):
 
-    def __init__(self, block, layers, num_classes=1000,if_include_top=False):
+    def __init__(self, block, layers, num_classes=1000, if_include_top=False):
         self.inplanes = 64
         super(ResNet, self).__init__()
         self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3,
@@ -195,7 +195,8 @@ def resnet50(pretrained=False, **kwargs):
     """
     model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
     if pretrained:
-        model.load_state_dict(torch.load('./resnet50.pth'),strict=False)
+        # model.load_state_dict(torch.load('./resnet50.pth'), strict=False)
+        model.load_state_dict(model_zoo.load_url(model_urls['resnet50']))
     return model
 
 
