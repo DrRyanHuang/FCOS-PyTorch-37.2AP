@@ -4,7 +4,7 @@ import math
 
 class FPN(nn.Module):
     '''only for resnet50,101,152'''
-    def __init__(self,features=256,use_p5=True):
+    def __init__(self, features=256, use_p5=True):
         super(FPN,self).__init__()
         self.prj_5 = nn.Conv2d(2048, features, kernel_size=1)
         self.prj_4 = nn.Conv2d(1024, features, kernel_size=1)
@@ -19,10 +19,10 @@ class FPN(nn.Module):
         self.conv_out7 = nn.Conv2d(features, features, kernel_size=3, padding=1, stride=2)
         self.use_p5=use_p5
         self.apply(self.init_conv_kaiming)
+        
     def upsamplelike(self,inputs):
-        src,target=inputs
-        return F.interpolate(src, size=(target.shape[2], target.shape[3]),
-                    mode='nearest')
+        src, target=inputs
+        return F.interpolate(src, size=(target.shape[2], target.shape[3]), mode='nearest')
     
     def init_conv_kaiming(self,module):
         if isinstance(module, nn.Conv2d):
@@ -30,6 +30,7 @@ class FPN(nn.Module):
 
             if module.bias is not None:
                 nn.init.constant_(module.bias, 0)
+    
     
     def forward(self,x):
         C3,C4,C5=x

@@ -195,8 +195,8 @@ def resnet50(pretrained=False, **kwargs):
     """
     model = ResNet(Bottleneck, [3, 4, 6, 3], **kwargs)
     if pretrained:
-        # model.load_state_dict(torch.load('./resnet50.pth'), strict=False)
-        model.load_state_dict(model_zoo.load_url(model_urls['resnet50']))
+        model.load_state_dict(torch.load('./resnet50.pth'), strict=False)
+        # model.load_state_dict(model_zoo.load_url(model_urls['resnet50']))
     return model
 
 
