@@ -81,7 +81,7 @@ for epoch in range(EPOCHS):
 
         #lr = lr_func()
         if GLOBAL_STEPS < WARMPUP_STEPS:
-           lr = float(GLOBAL_STEPS / WARMPUP_STEPS * LR_INIT)
+           lr = float(GLOBAL_STEPS / WARMPUP_STEPS * LR_INIT) # 从一个很很小的值开始慢慢增大到 LR_INIT 
            for param in optimizer.param_groups:
                param['lr'] = lr
         if GLOBAL_STEPS == 20001:

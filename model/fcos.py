@@ -33,6 +33,9 @@ class FCOS(nn.Module):
             classname = module.__class__.__name__
             if classname.find('BatchNorm') != -1:
                 for p in module.parameters(): p.requires_grad=False
+
+        # BN层的统计数据更新是在每一次训练阶段model.train()后的forward()方法中自动实现的，
+        # 而不是在梯度计算与反向传播中更新optim.step()中完成
         if self.config.freeze_bn:
             self.apply(freeze_bn)
             print("INFO===>success frozen BN")
