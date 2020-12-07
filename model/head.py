@@ -4,7 +4,7 @@ import torch
 import math
 
 class ScaleExp(nn.Module):
-    # ???
+    # e^(kx), k是可学习参数 
     def __init__(self, init_value=1.0):
         super(ScaleExp,self).__init__()
         self.scale = nn.Parameter(torch.tensor([init_value], dtype=torch.float32))
@@ -15,10 +15,10 @@ class ClsCntRegHead(nn.Module):
     def __init__(self, in_channel, class_num, GN=True, cnt_on_reg=True, prior=0.01):
         '''
         Args  
-        in_channel  
-        class_num  
-        GN  
-        prior  
+            in_channel  
+            class_num  
+            GN : Group Norm 
+            prior : 
         '''
         super(ClsCntRegHead,self).__init__()
         self.prior=prior
@@ -48,7 +48,7 @@ class ClsCntRegHead(nn.Module):
         
         self.apply(self.init_conv_RandomNormal)
         
-        nn.init.constant_(self.cls_logits.bias,-math.log((1 - prior) / prior))
+        nn.init.constant_(self.cls_logits.bias, -math.log((1 - prior) / prior))
         self.scale_exp = nn.ModuleList([ScaleExp(1.0) for _ in range(5)])
     
     def init_conv_RandomNormal(self, module, std=0.01):

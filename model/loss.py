@@ -26,25 +26,25 @@ def coords_fmap2orig(feature,stride):
     return coords
 
 class GenTargets(nn.Module):
-    def __init__(self,strides,limit_range):
+    def __init__(self, strides, limit_range):
         super().__init__()
-        self.strides=strides
-        self.limit_range=limit_range
+        self.strides = strides
+        self.limit_range = limit_range
         assert len(strides)==len(limit_range)
 
     def forward(self,inputs):
         '''
         inputs  
-        [0]list [cls_logits,cnt_logits,reg_preds]  
-        cls_logits  list contains five [batch_size,class_num,h,w]  
-        cnt_logits  list contains five [batch_size,1,h,w]  
-        reg_preds   list contains five [batch_size,4,h,w]  
-        [1]gt_boxes [batch_size,m,4]  FloatTensor  
-        [2]classes [batch_size,m]  LongTensor
+            [0]list [cls_logits,cnt_logits,reg_preds]  
+                cls_logits  list contains five [batch_size,class_num,h,w]  
+                cnt_logits  list contains five [batch_size,1,h,w]  
+                reg_preds   list contains five [batch_size,4,h,w]  
+            [1]gt_boxes [batch_size,m,4]  FloatTensor  
+            [2]classes [batch_size,m]  LongTensor
         Returns
-        cls_targets:[batch_size,sum(_h*_w),1]
-        cnt_targets:[batch_size,sum(_h*_w),1]
-        reg_targets:[batch_size,sum(_h*_w),4]
+            cls_targets:[batch_size,sum(_h*_w),1]
+            cnt_targets:[batch_size,sum(_h*_w),1]
+            reg_targets:[batch_size,sum(_h*_w),4]
         '''
         cls_logits,cnt_logits,reg_preds=inputs[0]
         gt_boxes=inputs[1]
@@ -61,7 +61,9 @@ class GenTargets(nn.Module):
             cnt_targets_all_level.append(level_targets[1])
             reg_targets_all_level.append(level_targets[2])
             
-        return torch.cat(cls_targets_all_level,dim=1),torch.cat(cnt_targets_all_level,dim=1),torch.cat(reg_targets_all_level,dim=1)
+        return torch.cat(cls_targets_all_level,dim=1), \
+            torch.cat(cnt_targets_all_level,dim=1), \
+            torch.cat(reg_targets_all_level,dim=1)
 
     def _gen_level_targets(self,out,gt_boxes,classes,stride,limit_range,sample_radiu_ratio=1.5):
         '''
@@ -291,9 +293,8 @@ def focal_loss_from_logits(preds,targets,gamma=2.0,alpha=0.25):
 
 
 
-
 class LOSS(nn.Module):
-    def __init__(self,config=None):
+    def __init__(self, config=None):
         super().__init__()
         if config is None:
             self.config=DefaultConfig
