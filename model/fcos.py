@@ -222,8 +222,8 @@ class FCOSDetector(nn.Module):
         super().__init__()
         if config is None:
             config=DefaultConfig
-        self.mode=mode
-        self.fcos_body=FCOS(config=config)
+        self.mode = mode
+        self.fcos_body = FCOS(config=config)
         if mode=="training":
             self.target_layer=GenTargets(strides=config.strides,limit_range=config.limit_range)
             self.loss_layer=LOSS()

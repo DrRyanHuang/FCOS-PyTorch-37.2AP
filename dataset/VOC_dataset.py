@@ -51,7 +51,7 @@ class VOCDataset(torch.utils.data.Dataset):
         self._imgsetpath = os.path.join(self.root, "ImageSets", "Main", "%s.txt")
 
         with open(self._imgsetpath%self.imgset) as f:
-            self.img_ids=f.readlines()
+            self.img_ids = f.readlines()
         self.img_ids=[x.strip() for x in self.img_ids]
         self.name2id=dict(zip(VOCDataset.CLASSES_NAME, range(len(VOCDataset.CLASSES_NAME))))
         self.id2name = {v:k for k,v in self.name2id.items()}
@@ -59,7 +59,7 @@ class VOCDataset(torch.utils.data.Dataset):
         self.mean=[0.485, 0.456, 0.406]
         self.std=[0.229, 0.224, 0.225]
         self.train = is_train
-        self.augment = augment
+        self.augment = augment # 此处是数据增广的方式
         print("INFO=====>voc dataset init finished  ! !")
 
     def __len__(self):

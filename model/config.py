@@ -11,7 +11,7 @@ class DefaultConfig():
     
     #head
     class_num=80
-    use_GN_head=True
+    use_GN_head=True # 是否使用 Group Normalization
     prior=0.01
     add_centerness=True
     cnt_on_reg=True
