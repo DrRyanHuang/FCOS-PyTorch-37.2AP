@@ -13,15 +13,15 @@ class FCOS(nn.Module):
     def __init__(self,config=None):
         super().__init__()
         if config is None:
-            config=DefaultConfig
-        self.backbone=resnet50(pretrained=config.pretrained, if_include_top=False)
-        self.fpn=FPN(config.fpn_out_channels, use_p5=config.use_p5)
-        self.head=ClsCntRegHead(config.fpn_out_channels,
+            config = DefaultConfig
+        self.backbone = resnet50(pretrained=config.pretrained, if_include_top=False)
+        self.fpn = FPN(config.fpn_out_channels, use_p5=config.use_p5)
+        self.head = ClsCntRegHead(config.fpn_out_channels,
                                 config.class_num,
                                 config.use_GN_head,
                                 config.cnt_on_reg,
                                 config.prior)
-        self.config=config
+        self.config = config
     def train(self,mode=True):
         '''
         set module training mode, and frozen bn
@@ -225,8 +225,8 @@ class FCOSDetector(nn.Module):
         self.mode = mode
         self.fcos_body = FCOS(config=config)
         if mode=="training":
-            self.target_layer=GenTargets(strides=config.strides,limit_range=config.limit_range)
-            self.loss_layer=LOSS()
+            self.target_layer = GenTargets(strides=config.strides, limit_range=config.limit_range)
+            self.loss_layer = LOSS()
         elif mode=="inference":
             self.detection_head=DetectHead(config.score_threshold,config.nms_iou_threshold,
                                             config.max_detection_boxes_num,config.strides,config)

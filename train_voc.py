@@ -32,7 +32,7 @@ cudnn.benchmark = False
 cudnn.deterministic = True # 如果配合上设置 Torch 的随机种子为固定值的话，应该可以保证每次运行网络的时候相同输入的输出是固定的
 random.seed(0)
 transform = Transforms()
-train_dataset = VOCDataset(root_dir='/home/ryan/Dataset/VOCdevkit/VOC2007',resize_size=[800,1333],
+train_dataset = VOCDataset(root_dir='/home/s/Documents/VOCdevkit/VOC2007',resize_size=[800,1333],
                            split='trainval',use_difficult=False,is_train=True,augment=transform)
 
 model = FCOSDetector(mode="training").cuda()
@@ -42,18 +42,25 @@ model = torch.nn.DataParallel(model) # 模型拷贝到每个 gpu, 但是数据�
 BATCH_SIZE = opt.batch_size
 EPOCHS = opt.epochs
 #WARMPUP_STEPS_RATIO = 0.12
-train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True,
+train_loader = torch.utils.data.DataLoader(train_dataset, 
+                                           batch_size=BATCH_SIZE, 
+                                           shuffle=True,
                                            collate_fn=train_dataset.collate_fn,
-                                           num_workers=opt.n_cpu, worker_init_fn=np.random.seed(0))
+                                           num_workers=opt.n_cpu, 
+                                           worker_init_fn=np.random.seed(0))
 print("total_images : {}".format(len(train_dataset)))
 steps_per_epoch = len(train_dataset) // BATCH_SIZE
 TOTAL_STEPS = steps_per_epoch * EPOCHS
+<<<<<<< HEAD
 WARMPUP_STEPS = 501 # Warmup是在ResNet论文中提到的一种学习率预热的方法，它在训练开始的时候先选择使用一个较小的学习率，训练了一些epoches或者steps,再修改为预先设置的学习率来进行训练
+=======
+WARMPUP_STEPS = 501 
+>>>>>>> 07fd8f6b760d160acf8ac188242b63ac461cc3c2
 
 GLOBAL_STEPS = 1
 LR_INIT = 2e-3
 LR_END = 2e-5
-optimizer = torch.optim.SGD(model.parameters(),lr =LR_INIT,momentum=0.9,weight_decay=0.0001)
+optimizer = torch.optim.SGD(model.parameters(), lr =LR_INIT, momentum=0.9, weight_decay=0.0001)
 
 # def lr_func():
 #      if GLOBAL_STEPS < WARMPUP_STEPS:
@@ -88,6 +95,7 @@ for epoch in range(EPOCHS):
            lr = LR_INIT * 0.01
            for param in optimizer.param_groups:
               param['lr'] = lr
+        
         start_time = time.time()
 
         optimizer.zero_grad()
