@@ -36,7 +36,7 @@ train_dataset = VOCDataset(root_dir='/home/ryan/Dataset/VOCdevkit/VOC2007',resiz
                            split='trainval',use_difficult=False,is_train=True,augment=transform)
 
 model = FCOSDetector(mode="training").cuda()
-model = torch.nn.DataParallel(model)
+model = torch.nn.DataParallel(model) # 模型拷贝到每个 gpu, 但是数据会分给各个GPU
 # model.load_state_dict(torch.load('/mnt/cephfs_new_wj/vc/zhangzhenghao/FCOS.Pytorch/output1/model_6.pth'))
 
 BATCH_SIZE = opt.batch_size
@@ -48,7 +48,7 @@ train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=BATCH_SIZE,
 print("total_images : {}".format(len(train_dataset)))
 steps_per_epoch = len(train_dataset) // BATCH_SIZE
 TOTAL_STEPS = steps_per_epoch * EPOCHS
-WARMPUP_STEPS = 501
+WARMPUP_STEPS = 501 # Warmup是在ResNet论文中提到的一种学习率预热的方法，它在训练开始的时候先选择使用一个较小的学习率，训练了一些epoches或者steps,再修改为预先设置的学习率来进行训练
 
 GLOBAL_STEPS = 1
 LR_INIT = 2e-3
