@@ -51,11 +51,8 @@ train_loader = torch.utils.data.DataLoader(train_dataset,
 print("total_images : {}".format(len(train_dataset)))
 steps_per_epoch = len(train_dataset) // BATCH_SIZE
 TOTAL_STEPS = steps_per_epoch * EPOCHS
-<<<<<<< HEAD
 WARMPUP_STEPS = 501 # Warmup是在ResNet论文中提到的一种学习率预热的方法，它在训练开始的时候先选择使用一个较小的学习率，训练了一些epoches或者steps,再修改为预先设置的学习率来进行训练
-=======
-WARMPUP_STEPS = 501 
->>>>>>> 07fd8f6b760d160acf8ac188242b63ac461cc3c2
+
 
 GLOBAL_STEPS = 1
 LR_INIT = 2e-3
