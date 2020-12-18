@@ -1,2 +1,4 @@
 resnet50.pth
 model/__pycache__/*
+dataset/__pycache__/*
+
