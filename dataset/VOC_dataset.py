@@ -104,11 +104,11 @@ class VOCDataset(torch.utils.data.Dataset):
         img = np.array(img)
         img,boxes=self.preprocess_img_boxes(img,boxes,self.resize_size)
 
-        img=transforms.ToTensor()(img)
-        boxes=torch.from_numpy(boxes)
-        classes=torch.LongTensor(classes)
+        img = transforms.ToTensor()(img)
+        boxes = torch.from_numpy(boxes)
+        classes = torch.LongTensor(classes)
 
-        return img,boxes,classes
+        return img, boxes, classes
 
 
     def preprocess_img_boxes(self,image,boxes,input_ksize):
@@ -141,8 +141,11 @@ class VOCDataset(torch.utils.data.Dataset):
             boxes[:, [0, 2]] = boxes[:, [0, 2]] * scale
             boxes[:, [1, 3]] = boxes[:, [1, 3]] * scale
             return image_paded, boxes
+        
     def collate_fn(self,data):
-        imgs_list,boxes_list,classes_list=zip(*data)
+        # 通过此参数指定如果将样本列表组合为mini-batch数据
+        
+        imgs_list, boxes_list, classes_list=zip(*data)
         assert len(imgs_list)==len(boxes_list)==len(classes_list)
         batch_size=len(boxes_list)
         pad_imgs_list=[]
@@ -155,23 +158,37 @@ class VOCDataset(torch.utils.data.Dataset):
         max_w = np.array(w_list).max()
         for i in range(batch_size):
             img=imgs_list[i]
-            pad_imgs_list.append(transforms.Normalize(self.mean, self.std,inplace=True)(torch.nn.functional.pad(img,(0,int(max_w-img.shape[2]),0,int(max_h-img.shape[1])),value=0.)))
+            temp = transforms.Normalize(self.mean, 
+                                        self.std, 
+                                        inplace=True)(torch.nn.functional.pad(img, # 左右上下
+                                                                              (0,int(max_w-img.shape[2]),0,int(max_h-img.shape[1])),
+                                                                              value=0.))
+            pad_imgs_list.append(temp)
 
 
-        max_num=0
+        max_num=0 # 找到最多的 bbox 数
         for i in range(batch_size):
-            n=boxes_list[i].shape[0]
-            if n>max_num:max_num=n
+            n = boxes_list[i].shape[0] # 有多少个 bbox
+            if n > max_num:
+                max_num = n
+        
         for i in range(batch_size):
-            pad_boxes_list.append(torch.nn.functional.pad(boxes_list[i],(0,0,0,max_num-boxes_list[i].shape[0]),value=-1))
-            pad_classes_list.append(torch.nn.functional.pad(classes_list[i],(0,max_num-classes_list[i].shape[0]),value=-1))
+            # 将对应的位置补齐
+            pad_box = torch.nn.functional.pad(boxes_list[i],
+                                              (0, 0, 0, max_num-boxes_list[i].shape[0]), # 左右上下
+                                              value=-1)
+            pad_boxes_list.append(pad_box)
+            pad_class = torch.nn.functional.pad(classes_list[i],
+                                                (0, max_num-classes_list[i].shape[0]),   # 左右
+                                                value=-1)
+            pad_classes_list.append(pad_class)
 
 
-        batch_boxes=torch.stack(pad_boxes_list)
-        batch_classes=torch.stack(pad_classes_list)
-        batch_imgs=torch.stack(pad_imgs_list)
+        batch_boxes = torch.stack(pad_boxes_list)
+        batch_classes = torch.stack(pad_classes_list)
+        batch_imgs = torch.stack(pad_imgs_list)
 
-        return batch_imgs,batch_boxes,batch_classes
+        return batch_imgs, batch_boxes, batch_classes
 
 
 if __name__=="__main__":

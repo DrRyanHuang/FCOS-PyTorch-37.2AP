@@ -17,18 +17,18 @@ class FCOS(nn.Module):
         self.backbone = resnet50(pretrained=config.pretrained, if_include_top=False)
         self.fpn = FPN(config.fpn_out_channels, use_p5=config.use_p5)
         self.head = ClsCntRegHead(config.fpn_out_channels,
-                                config.class_num,
-                                config.use_GN_head,
-                                config.cnt_on_reg,
-                                config.prior)
+                                  config.class_num,
+                                  config.use_GN_head,
+                                  config.cnt_on_reg,
+                                  config.prior)
         self.config = config
-    def train(self,mode=True):
+    def train(self, mode=True):
         '''
         set module training mode, and frozen bn
         '''
-        super().train(mode=True)
+        super().train(mode = True)
         def freeze_bn(module):
-            if isinstance(module,nn.BatchNorm2d):
+            if isinstance(module, nn.BatchNorm2d):
                 module.eval()
             classname = module.__class__.__name__
             if classname.find('BatchNorm') != -1:
@@ -51,10 +51,10 @@ class FCOS(nn.Module):
         cnt_logits  list contains five [batch_size,1,h,w]
         reg_preds   list contains five [batch_size,4,h,w]
         '''
-        C3,C4,C5=self.backbone(x)
-        all_P=self.fpn([C3,C4,C5])
-        cls_logits,cnt_logits,reg_preds=self.head(all_P)
-        return [cls_logits,cnt_logits,reg_preds]
+        C3, C4, C5 = self.backbone(x)
+        all_P = self.fpn([C3, C4, C5])
+        cls_logits, cnt_logits, reg_preds = self.head(all_P)
+        return [cls_logits, cnt_logits, reg_preds]
 
 class DetectHead(nn.Module):
     def __init__(self,score_threshold,nms_iou_threshold,max_detection_boxes_num,strides,config=None):
@@ -236,7 +236,7 @@ class FCOSDetector(nn.Module):
             self.clip_boxes=ClipBoxes()
         
     
-    def forward(self,inputs):
+    def forward(self, inputs):
         '''
         inputs 
         [training] list  batch_imgs,batch_boxes,batch_classes
@@ -244,10 +244,10 @@ class FCOSDetector(nn.Module):
         '''
 
         if self.mode=="training":
-            batch_imgs,batch_boxes,batch_classes=inputs
-            out=self.fcos_body(batch_imgs)
-            targets=self.target_layer([out,batch_boxes,batch_classes])
-            losses=self.loss_layer([out,targets])
+            batch_imgs, batch_boxes, batch_classes = inputs
+            out = self.fcos_body(batch_imgs) # out == [cls_logits, cnt_logits, reg_preds]
+            targets = self.target_layer([out, batch_boxes, batch_classes])
+            losses = self.loss_layer([out, targets])
             return losses
         elif self.mode=="inference":
             # raise NotImplementedError("no implement inference model")

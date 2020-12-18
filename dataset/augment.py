@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import math, random
 from PIL import Image
@@ -12,7 +13,8 @@ class Transforms(object):
             img, boxes = colorJitter(img, boxes)
         if random.random() < 0.5:
             img, boxes = random_rotation(img, boxes)
-        if random.random() < 0.5:
+        # if random.random() < 0.5:
+        if True:
             img, boxes = random_crop_resize(img, boxes)
         return img, boxes
 
@@ -67,10 +69,20 @@ def _box_inter(box1, box2):
     inter = hw[:,:,0] * hw[:,:,1]  # [n,m]
     return inter
 
-
+# def fuck(img_old, boxes):
+#     img = img_old.copy()
+#     from PIL import Image, ImageDraw, ImageFont
+#     draw = ImageDraw.Draw(img)
+#     if len(boxes.shape) == 2:
+#         for box in boxes:
+#             draw.rectangle(box, outline='red',width=2)
+#     else:
+#         draw.rectangle(boxes, outline='red',width=2)
+#     img.show()
 
 def random_crop_resize(img, boxes, crop_scale_min=0.2, aspect_ratio=[3./4, 4./3], remain_min=0.7, attempt_max=10):
     success = False
+    # fuck(img, boxes)
     boxes = torch.from_numpy(boxes)
     for attempt in range(attempt_max):
         # choose crop size
