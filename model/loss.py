@@ -130,17 +130,19 @@ class GenTargets(nn.Module):
 
         mask_pos = mask_in_gtboxes & mask_in_level & mask_center # [batch_size, h*w, m]
 
-        areas[~mask_pos] = 99999999
+        areas[~mask_pos] = 99999999 # 为啥用面积去做后边的索引
         areas_min_ind = torch.min(areas, dim=-1)[1] # [batch_size, h*w] # 注意此处索引为 1
         
         # scatter_(input, dim, index, src) : 将src中数据根据index中的索引按照dim的方向填进input
-        temp_idx = torch.zeros_like(areas, dtype=torch.bool).scatter_(-1, areas_min_ind.unsqueeze(dim=-1), 1)
-        reg_targets = ltrb_off[temp_idx] # [batch_size*h*w, 4]
-        reg_targets = torch.reshape(reg_targets,(batch_size,-1,4))#[batch_size,h*w,4]
+        are_min_idx = torch.zeros_like(areas, dtype=torch.bool).scatter_(-1, areas_min_ind.unsqueeze(dim=-1), 1) # 面积小的为 True, 大的为 False, 若都大，则最后的为 False
+        reg_targets = ltrb_off[are_min_idx] # [batch_size*h*w, 4] # 将距离中心距离近的留下
+        reg_targets = torch.reshape(reg_targets, (batch_size, -1, 4)) # [batch_size, h*w, 4]
 
-        classes = torch.broadcast_tensors(classes[:,None,:],areas.long())[0]#[batch_size,h*w,m]
-        cls_targets = classes[torch.zeros_like(areas,dtype=torch.bool).scatter_(-1,areas_min_ind.unsqueeze(dim=-1),1)]
-        cls_targets = torch.reshape(cls_targets,(batch_size,-1,1))#[batch_size,h*w,1]
+        # torch.broadcast_tensors : Broadcasts the given tensors according to broadcasting-semantics. 推荐自己看一下文档
+        classes = torch.broadcast_tensors(classes[:,None,:], areas.long())[0] # [batch_size, h*w, m]
+        # are_min_idx = torch.zeros_like(areas, dtype=torch.bool).scatter_(-1, areas_min_ind.unsqueeze(dim=-1), 1)
+        cls_targets = classes[are_min_idx]
+        cls_targets = torch.reshape(cls_targets,(batch_size,-1,1)) # [batch_size,h*w,1]
         
         # 终于到论文中计算 Center-ness 的部分
         left_right_min = torch.min(reg_targets[..., 0], reg_targets[..., 2]) # [batch_size,h*w]
@@ -154,14 +156,14 @@ class GenTargets(nn.Module):
         assert cnt_targets.shape==(batch_size,h_mul_w,1)
 
         #process neg coords
-        mask_pos_2=mask_pos.long().sum(dim=-1)#[batch_size,h*w]
+        mask_pos_2 = mask_pos.long().sum(dim=-1)#[batch_size,h*w]
         # num_pos=mask_pos_2.sum(dim=-1)
         # assert num_pos.shape==(batch_size,)
         mask_pos_2=mask_pos_2>=1
         assert mask_pos_2.shape==(batch_size,h_mul_w)
-        cls_targets[~mask_pos_2]=0#[batch_size,h*w,1]
-        cnt_targets[~mask_pos_2]=-1
-        reg_targets[~mask_pos_2]=-1
+        cls_targets[~mask_pos_2] =  0 # [batch_size,h*w,1]
+        cnt_targets[~mask_pos_2] = -1
+        reg_targets[~mask_pos_2] = -1
         
         return cls_targets, cnt_targets, reg_targets
         
